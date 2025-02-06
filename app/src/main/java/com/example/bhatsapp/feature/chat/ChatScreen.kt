@@ -69,7 +69,10 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.jar.Manifest
+//import java.util.jar.Manifest
+import android.Manifest
+import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser
 
 @Composable
 fun ChatScreen(navController: NavController, channelId: String, channelName: String) {
@@ -147,10 +150,10 @@ fun ChatScreen(navController: NavController, channelId: String, channelName: Str
         if (chooserDialog.value) {
             ContentSelectionDialog(onCameraSelected = {
                 chooserDialog.value = false
-                if (navController.context.checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                if (navController.context.checkSelfPermission(Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                     cameraImageLauncher.launch(createImageUri())
                 } else {
-                    permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
                 }
             }, onGallerySelected = {
                 chooserDialog.value = false
@@ -194,6 +197,25 @@ fun ChatMessages(
     }
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.weight(1f)) {
+            item {
+                ChannelItem(channelName = channelName, Modifier, true, onClick = {}, onCall = { callButton->
+                    viewModel.getAllUserEmails(channelID) {
+                        val list: MutableList<ZegoUIKitUser> = mutableListOf()
+                        it.forEach { email ->
+                            Firebase.auth.currentUser?.email?.let { em ->
+                                if(email != em){
+                                    list.add(
+                                        ZegoUIKitUser(
+                                            email, email
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                        callButton.setInvitees(list)
+                    }
+                })
+            }
             items(messages) { message ->
                 ChatBubble(message = message)
             }
@@ -294,5 +316,14 @@ fun ChatBubble(message: Message) {
     }
 }
 
-
-
+@Composable
+fun CallButton(isVideoCall: Boolean, onClick: (ZegoSendCallInvitationButton) -> Unit) {
+    AndroidView(factory = { context ->
+        val button = ZegoSendCallInvitationButton(context)
+        button.setIsVideoCall(isVideoCall)
+        button.resourceID = "zego_data"
+        button
+    }, modifier = Modifier.size(50.dp)) { zegoCallButton ->
+        zegoCallButton.setOnClickListener { _ -> onClick(zegoCallButton) }
+    }
+}
