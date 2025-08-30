@@ -263,21 +263,74 @@ fun ChatMessages(
     }
 }
 
+//@Composable
+//fun ChatBubble(message: Message) {
+//    val isCurrentUser = message.senderId == Firebase.auth.currentUser?.uid
+//    val bubbleColor = if (isCurrentUser) {
+//        Purple
+//    } else {
+//        DarkGrey1
+//    }
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 4.dp, horizontal = 8.dp)
+//
+//    ) {
+//        val alignment = if (!isCurrentUser) Alignment.CenterStart else Alignment.CenterEnd
+//        Row(
+//            modifier = Modifier
+//                .padding(8.dp)
+//                .align(alignment),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            if (!isCurrentUser) {
+//                Image(
+//                    painter = painterResource(id = R.drawable.friend),
+//                    contentDescription = null,
+//                    modifier = Modifier.size(40.dp)
+//                )
+//                Spacer(modifier = Modifier.width(8.dp))
+//            }
+//            Box(
+//                modifier = Modifier
+//                    .background(
+//                        color = bubbleColor, shape = RoundedCornerShape(8.dp)
+//                    )
+//                    .padding(16.dp)
+//            ) {
+//                if (message.imageUrl != null) {
+//                    AsyncImage(
+//                        model = message.imageUrl,
+//                        contentDescription = null,
+//                        modifier = Modifier.size(200.dp),
+//                        contentScale = ContentScale.Crop
+//                    )
+//                } else {
+//                    if(!message.message.isNullOrBlank() && message.message.isNotEmpty()){
+//                        Text(text = message.message.trim() ?: "", color = Color.White)
+//                    }
+//
+//                }
+//            }
+//
+//        }
+//
+//    }
+//}
+
 @Composable
 fun ChatBubble(message: Message) {
+    if(message.message.isNullOrBlank() && message.imageUrl == null) return
     val isCurrentUser = message.senderId == Firebase.auth.currentUser?.uid
-    val bubbleColor = if (isCurrentUser) {
-        Purple
-    } else {
-        DarkGrey1
-    }
+    val bubbleColor = if (isCurrentUser) Purple else DarkGrey1
+    val alignment = if (!isCurrentUser) Alignment.CenterStart else Alignment.CenterEnd
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp, horizontal = 8.dp)
-
     ) {
-        val alignment = if (!isCurrentUser) Alignment.CenterStart else Alignment.CenterEnd
         Row(
             modifier = Modifier
                 .padding(8.dp)
@@ -292,27 +345,38 @@ fun ChatBubble(message: Message) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = bubbleColor, shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(16.dp)
-            ) {
-                if (message.imageUrl != null) {
-                    AsyncImage(
-                        model = message.imageUrl,
-                        contentDescription = null,
-                        modifier = Modifier.size(200.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Text(text = message.message?.trim() ?: "", color = Color.White)
+            Column {
+                // Display sender name
+                Text(
+                    text = message.senderName,
+                    color = Color.LightGray,
+                    style = androidx.compose.material3.MaterialTheme.typography.labelSmall
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = bubbleColor, shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(16.dp)
+                ) {
+                    if (message.imageUrl != null) {
+                        AsyncImage(
+                            model = message.imageUrl,
+                            contentDescription = null,
+                            modifier = Modifier.size(200.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else if (!message.message.isNullOrBlank() && message.message.isNotEmpty()) {
+                        println("message: ${message.message}")
+                        Text(
+                            text = message.message.trim(),
+                            color = Color.White
+                        )
+                    }
                 }
             }
-
         }
-
     }
 }
 

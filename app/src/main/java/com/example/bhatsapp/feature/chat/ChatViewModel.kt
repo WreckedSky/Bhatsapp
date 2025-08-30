@@ -55,7 +55,9 @@ class ChatViewModel @Inject constructor(@ApplicationContext val context: Context
     }
 
     fun sendImageMessage(uri: Uri, channelID: String) {
+        println(uri.toString())
         val imageRef = Firebase.storage.reference.child("images/${UUID.randomUUID()}")
+        println(imageRef)
         imageRef.putFile(uri).continueWithTask { task ->
             if (!task.isSuccessful) {
                 task.exception?.let {
@@ -91,7 +93,7 @@ class ChatViewModel @Inject constructor(@ApplicationContext val context: Context
                 }
             })
         subscribeForNotification(channelID)
-        registerUserIdtoChannel(channelID)
+//        registerUserIdtoChannel(channelID)
     }
 
     fun getAllUserEmails(channelID: String, callback: (List<String>) -> Unit) {
@@ -111,23 +113,23 @@ class ChatViewModel @Inject constructor(@ApplicationContext val context: Context
         })
     }
 
-    fun registerUserIdtoChannel(channelID: String) {
-        val currentUser = Firebase.auth.currentUser
-        val ref = db.reference.child("channels").child(channelID).child("users")
-        ref.child(currentUser?.uid ?: "").addListenerForSingleValueEvent(
-            object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (!snapshot.exists()) {
-                        ref.child(currentUser?.uid ?: "").setValue(currentUser?.email)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                }
-            }
-        )
-
-    }
+//    fun registerUserIdtoChannel(channelID: String) {
+//        val currentUser = Firebase.auth.currentUser
+//        val ref = db.reference.child("channels").child(channelID).child("users")
+//        ref.child(currentUser?.uid ?: "").addListenerForSingleValueEvent(
+//            object : ValueEventListener {
+//                override fun onDataChange(snapshot: DataSnapshot) {
+//                    if (!snapshot.exists()) {
+//                        ref.child(currentUser?.uid ?: "").setValue(currentUser?.email)
+//                    }
+//                }
+//
+//                override fun onCancelled(error: DatabaseError) {
+//                }
+//            }
+//        )
+//
+//    }
 
     private fun subscribeForNotification(channelID: String) {
         FirebaseMessaging.getInstance().subscribeToTopic("group_$channelID")
@@ -146,7 +148,7 @@ class ChatViewModel @Inject constructor(@ApplicationContext val context: Context
         senderName: String,
         messageContent: String
     ) {
-        val fcmUrl = "https://fcm.googleapis.com/v1/projects/chatter-bbd0d/messages:send"
+        val fcmUrl = "https://fcm.googleapis.com/v1/projects/bhatsapp-47449/messages:send"
         val jsonBody = JSONObject().apply {
             put("message", JSONObject().apply {
                 put("topic", "group_$channelID")
@@ -180,7 +182,7 @@ class ChatViewModel @Inject constructor(@ApplicationContext val context: Context
     }
 
     private fun getAccessToken(): String {
-        val inputStream = context.resources.openRawResource(com.google.firebase.R.raw.firebase_common_keep)
+        val inputStream = context.resources.openRawResource(R.raw.bhatsapp_key)
         val googleCreds = GoogleCredentials.fromStream(inputStream)
             .createScoped(listOf("https://www.googleapis.com/auth/firebase.messaging"))
         return googleCreds.refreshAccessToken().tokenValue

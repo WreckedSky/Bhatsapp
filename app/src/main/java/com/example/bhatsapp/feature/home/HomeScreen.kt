@@ -74,19 +74,49 @@ fun HomeScreen(navController: NavController) {
     val addChannel = remember {
         mutableStateOf(false)
     }
+
+    val joinChannel = remember {
+        mutableStateOf(false)
+    }
     val sheetState = rememberModalBottomSheetState()
     Scaffold(
         floatingActionButton = {
-            Box(modifier = Modifier
-                .padding(16.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.Blue)
-                .clickable {
-                    addChannel.value = true
-                }) {
-                Text(
-                    text = "Add Channel", modifier = Modifier.padding(16.dp), color = Color.White
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp, 0.dp, 0.dp, 0.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Join Channel Button (Bottom Left)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.Blue)
+                        .clickable {
+                            joinChannel.value = true
+                        }
+                ) {
+                    Text(
+                        text = "Join Channel",
+                        modifier = Modifier.padding(16.dp),
+                        color = Color.White
+                    )
+                }
+                // Add Channel Button (Bottom Right)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.Blue)
+                        .clickable {
+                            addChannel.value = true
+                        }
+                ) {
+                    Text(
+                        text = "Add Channel",
+                        modifier = Modifier.padding(16.dp),
+                        color = Color.White
+                    )
+                }
             }
         }, containerColor = Color.Black
     ) {
@@ -153,6 +183,15 @@ fun HomeScreen(navController: NavController) {
             AddChannelDialog {
                 viewModel.addChannel(it)
                 addChannel.value = false
+            }
+        }
+    }
+
+    if(joinChannel.value) {
+        ModalBottomSheet(onDismissRequest = { joinChannel.value = false }, sheetState = sheetState) {
+            AddChannelDialog { channelID ->
+                viewModel.joinChannel(channelID)
+                joinChannel.value = false
             }
         }
     }
